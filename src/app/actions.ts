@@ -3,7 +3,7 @@
 import { Message, Role } from 'genkit';
 import { z } from "genkit";
 import { ai, textModel } from "@/ai/genkit";
-import { getRelevantDocuments } from '@/services/knowledge-base';
+import { getKnowledgeBaseContent } from '@/services/knowledge-base';
 import wav from 'wav';
 
 // --- Types for ExtractAnswer ---
@@ -75,7 +75,7 @@ export async function getAiResponse(input: ExtractAnswerInput): Promise<ExtractA
   if (!input.question) {
     throw new Error("Question cannot be empty.");
   }
-
+  
   const systemPrompt = `You are an AI assistant providing information to kidney patients. You have access to a verified kidney health database.
 
 Detect the language of the user's question (English, Hindi, or Marathi) and respond in the same language.
@@ -89,8 +89,9 @@ Use the conversation history to understand the context of the user's question.`;
     (msg) => new Message(msg.role as Role, msg.content)
   );
 
-  const relevantDocs = await getRelevantDocuments(input.question);
-  const context = relevantDocs.map(doc => doc.pageContent).join('\n\n');
+  const knowledgeBaseContent = await getKnowledgeBaseContent();
+  
+  const context = knowledgeBaseContent;
 
   const prompt = `CONTEXT:
 ${context}

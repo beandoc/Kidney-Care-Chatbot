@@ -1,76 +1,65 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { Document } from 'langchain/document';
-import { CharacterTextSplitter } from 'langchain/text_splitter';
-import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
-import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 
+// Define the path to the knowledge base directory
 const KNOWLEDGE_BASE_DIR = path.resolve(process.cwd(), 'src', 'data', 'knowledge-base');
 
-let vectorStore: MemoryVectorStore | null = null;
+// In-memory cache for the knowledge base content
+let knowledgeBaseContent: string | null = null;
+let lastModifiedTime: number = 0;
 
-async function getVectorStore() {
-  if (vectorStore) {
-    return vectorStore;
-  }
-
+/**
+ * Reads all .txt and .md files from the knowledge base directory,
+ * concatenates their content, and caches it.
+ * The cache is invalidated if the directory's modification time changes.
+ * @returns A single string containing all the knowledge base content.
+ */
+export async function getKnowledgeBaseContent(): Promise<string> {
   try {
-    await fs.mkdir(KNOWLEDGE_BASE_DIR, { recursive: true });
-    const files = await fs.readdir(KNOWLEDGE_BASE_DIR);
-    const supportedFiles = files.filter(file => file.endsWith('.txt') || file.endsWith('.md'));
+    const stats = await fs.stat(KNOWLEDGE_BASE_DIR);
+    const mtimeMs = stats.mtimeMs;
 
-    if (supportedFiles.length === 0) {
-      console.log("No .txt or .md files found in the knowledge base directory. The chatbot will only use its general knowledge.");
-      const embeddings = new GoogleGenerativeAIEmbeddings({
-        apiKey: process.env.GEMINI_API_KEY,
-        model: "text-embedding-004",
-      });
-      vectorStore = new MemoryVectorStore(embeddings);
-      // Add a dummy document to prevent errors with an empty vector store
-      await vectorStore.addDocuments([new Document({ pageContent: "This is a placeholder document." })]);
-      return vectorStore;
+    // If directory hasn't changed and content is cached, return cached content
+    if (mtimeMs === lastModifiedTime && knowledgeBaseContent) {
+      console.log("Returning cached knowledge base content.");
+      return knowledgeBaseContent;
     }
 
-    const docs: Document[] = [];
+    console.log("Knowledge base changed or not cached. Reading files...");
+    // Ensure the directory exists
+    await fs.mkdir(KNOWLEDGE_BASE_DIR, { recursive: true });
+
+    const files = await fs.readdir(KNOWLEDGE_BASE_DIR);
+    const supportedFiles = files.filter(
+      (file) => file.endsWith('.txt') || file.endsWith('.md')
+    );
+
+    if (supportedFiles.length === 0) {
+      console.warn("No .txt or .md files found in the knowledge base directory.");
+      return ""; // Return empty string if no files are found
+    }
+
+    let allContent = '';
     for (const file of supportedFiles) {
       const filePath = path.join(KNOWLEDGE_BASE_DIR, file);
       const content = await fs.readFile(filePath, 'utf-8');
-      docs.push(new Document({ pageContent: content, metadata: { source: file } }));
+      allContent += content + '\n\n'; // Add separator between files
     }
 
-    const splitter = new CharacterTextSplitter({
-      chunkSize: 1000,
-      chunkOverlap: 200,
-    });
-
-    const splitDocs = await splitter.splitDocuments(docs);
-
-    const embeddings = new GoogleGenerativeAIEmbeddings({
-      apiKey: process.env.GEMINI_API_KEY,
-      model: "text-embedding-004",
-    });
-
-    vectorStore = await MemoryVectorStore.fromDocuments(splitDocs, embeddings);
-    console.log("Knowledge base loaded successfully from .txt and .md files.");
-    return vectorStore;
+    // Update cache and last modified time
+    knowledgeBaseContent = allContent.trim();
+    lastModifiedTime = mtimeMs;
+    
+    console.log("Knowledge base loaded successfully.");
+    return knowledgeBaseContent;
   } catch (error) {
-    console.error("Error initializing knowledge base:", error);
-    // Create an empty vector store on error to prevent crashes
-    const embeddings = new GoogleGenerativeAIEmbeddings({
-        apiKey: process.env.GEMINI_API_KEY,
-        model: "text-embedding-004",
-    });
-    vectorStore = new MemoryVectorStore(embeddings);
-    await vectorStore.addDocuments([new Document({ pageContent: "Error loading knowledge base." })]);
-    return vectorStore;
+    // Check if the error is because the directory doesn't exist
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+        console.warn(`Knowledge base directory not found at: ${KNOWLEDGE_BASE_DIR}. Returning empty content.`);
+        return "";
+    }
+    console.error("Error reading knowledge base directory:", error);
+    // In case of other errors, return empty string to prevent crashing
+    return "";
   }
-}
-
-export async function getRelevantDocuments(query: string) {
-  const store = await getVectorStore();
-  if (store.memoryVectors.length === 1 && store.memoryVectors[0].content.includes('placeholder')) {
-      return [];
-  }
-  const results = await store.similaritySearch(query, 4);
-  return results;
 }
