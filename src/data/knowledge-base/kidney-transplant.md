@@ -1,26 +1,44 @@
 # Kidney Transplant
 
-## What is a Kidney Transplant?
+When kidneys fail, treatment is required to take over their functions. The two primary treatments are dialysis and kidney transplant. A transplant provides you with a healthy kidney to perform the tasks your own kidneys can no longer handle. On average, a kidney from a living donor functions for 15-20 years, while one from a deceased donor lasts 8-12 years, though individual results vary.
 
-A kidney transplant is a surgery to place a healthy kidney from a living or deceased donor into a person whose kidneys no longer function properly. A kidney transplant is a treatment for kidney failure (end-stage renal disease), not a cure. The new kidney does the work that your two failed kidneys used to do.
+While many patients begin dialysis before receiving a transplant, it's also possible to get a preemptive transplant before dialysis is needed. Research suggests that a preemptive transplant, with little to no time on dialysis, can lead to better long-term health outcomes and a higher quality of life. If you are in Stage 3B, 4, or 5 of CKD, it's an ideal time to discuss transplant options with your doctor.
 
-## Who Can Get a Kidney Transplant?
-
-A transplant is an option for people with end-stage renal disease (ESRD). The transplant team will perform a full medical and psychosocial evaluation to determine if you are a good candidate. You must be healthy enough for surgery and be able to stick to the required treatment plan after the transplant. A transplant may not be recommended if you have an active infection, a recent history of cancer, or severe heart or lung disease.
-
-## Where Do Donated Kidneys Come From?
+## Types: Living and Deceased Donors
 
 There are two sources for a donor kidney:
 
-1.  **Living Donor:** A living donor is a healthy person who chooses to donate one of their kidneys. This can be a family member (like a parent, sibling, or child), a spouse, a friend, or even a stranger (an altruistic donor). Kidneys from living donors generally last longer and start working faster.
-2.  **Deceased Donor:** A deceased donor is someone who has been declared brain dead and whose family has consented to organ donation. Most kidney transplants come from deceased donors. Patients waiting for a deceased donor kidney are placed on a national waiting list.
+-   **Deceased Donor:** The kidney comes from an individual who has passed away and chose to be an organ donor.
+-   **Living Donor:** The kidney is donated by a living person with two healthy kidneys. A living donor can be a family member, friend, or even a stranger, and does not need to be related to you.
+
+The first step for either type of transplant is a thorough evaluation at a transplant center. A potential living donor can often be evaluated at the same time as the recipient (the person receiving the kidney).
+
+## Benefits of a Transplant
+
+-   Studies indicate that individuals with kidney transplants generally live longer than those who remain on dialysis.
+-   A successful transplant can restore the freedom to work, travel, and spend more time with loved ones, improving your overall quality of life.
+-   Dietary restrictions are often less strict, though a heart-healthy diet is recommended to protect your new kidney.
+-   Most patients experience improved health and energy levels.
+
+## Risks of a Transplant
+
+-   A transplant is a treatment, not a cure for kidney disease.
+-   You must take anti-rejection medications (immunosuppressants) daily for as long as the kidney works. These can have side effects.
+-   There is an increased risk for infections and certain types of cancer due to the immunosuppressant medications.
+-   The lifespan of a transplanted kidney varies, and some individuals may need more than one transplant in their lifetime.
+
+## Who Can Get a Transplant?
+
+Kidney patients of all ages can be considered for a transplant. While some centers may have age limits, many do not. Every potential candidate undergoes a comprehensive medical and psychosocial evaluation to ensure they are healthy enough for surgery and prepared for post-transplant care. Even with other health conditions like diabetes, a successful transplant is often possible. It is important to note that being placed on the waitlist is not automatic; you must be evaluated at a transplant center first.
 
 ## The Transplant Surgery
 
-The transplant surgery typically takes about 3 to 4 hours. The surgeon places the new kidney in your lower abdomen and connects the artery and vein of the new kidney to your artery and vein. Your own kidneys are usually left in place unless they are causing problems like high blood pressure or infection. The new kidney's ureter (the tube that carries urine) is connected to your bladder. Most people start to make urine as soon as the blood starts flowing through the new kidney.
+The surgery to place the new kidney typically lasts 3-4 hours. The donated kidney is positioned in the lower abdomen to easily connect it to your blood vessels and bladder. Your own kidneys are usually left in place unless there's a specific medical reason to remove them.
 
-## Life After Transplant
+Recovery begins quickly. You will be encouraged to stand and walk soon after the surgery. Most patients can return home within a few days, followed by frequent check-ups at the transplant center. Over time, as you and your new kidney stabilize, your regular kidney doctor will resume your care.
 
-After a successful kidney transplant, you can expect a significant improvement in your quality of life. You will feel more energetic and will have fewer dietary restrictions than you did on dialysis.
+## Where to Start
 
-However, a transplant is a lifelong commitment. You will need to take special medications called immunosuppressants (anti-rejection drugs) every day for as long as you have your new kidney. These drugs prevent your body's immune system from attacking and rejecting the new kidney. These medications have side effects, and you will need regular check-ups with your transplant team to monitor your health and kidney function closely.
+### Your First Step: Evaluation
+
+The journey to a transplant begins with an evaluation at a transplant center. You can ask your doctor for a referral or contact a center directly—a practice known as a self-referral. This evaluation is necessary even if you already have a willing living donor.
