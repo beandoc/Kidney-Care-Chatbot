@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, type FormEvent } from "react";
@@ -119,7 +120,8 @@ export default function Chat() {
     if ((!messageContent.trim() && !imageUri) || isLoading) return;
 
     const userMessage: Message = { role: "user", content: messageContent, image: imageUri ?? undefined };
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput("");
     setImagePreview(null);
     setIsLoading(true);
@@ -142,8 +144,8 @@ export default function Chat() {
           setMessages(prev => [...prev, assistantMessage]);
 
       } else {
-        const history: HistoryMessage[] = messages
-          .filter(m => !m.image)
+        const history: HistoryMessage[] = newMessages
+          .filter(m => !m.image) // Exclude image-based messages from history
           .map(m => ({
             role: m.role === 'assistant' ? 'model' : 'user',
             content: m.content
