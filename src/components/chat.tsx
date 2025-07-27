@@ -252,14 +252,43 @@ export default function Chat() {
         <ScrollArea className="h-full" viewportRef={scrollAreaRef}>
           <div className="p-4 md:p-6 space-y-8">
             {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center text-center text-muted-foreground pt-20">
-                <div className="p-4 rounded-full bg-primary/10 mb-4">
+              <div className="flex flex-col items-center justify-center text-center text-muted-foreground pt-8 space-y-4">
+                <div className="p-4 rounded-full bg-primary/10 mb-2">
                   <Bot className="w-12 h-12 text-primary" />
                 </div>
-                <h2 className="text-2xl font-semibold">How can I help you today?</h2>
-                <p className="max-w-sm mt-2">
-                  Ask me about kidney health, or upload a food picture for nutritional analysis.
-                </p>
+                <div className="prose prose-sm max-w-full text-left bg-secondary p-4 rounded-lg">
+                  <p>
+                    Hello! I'm here to assist you with all your questions about Kidney Health, the Kidney Wellness Clinic or Dr Sachin Srivastava.. Whether you need to schedule an in-clinic appointment (preferred) or an online consult, learn more about our services, or get more information. I'm here to help you every step of the way. Let's ensure you have a wonderful experience!
+                  </p>
+                  <p className="text-xs italic">
+                    (मराठी, English, हिंदी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, বাংলা or any other language)
+                  </p>
+                  <p>
+                    <a href="#" className="text-primary font-bold no-underline hover:underline">Book Appointment at Kidney Wellness Clinic...</a>
+                  </p>
+                  <p>
+                    For regular health updates Follow our WhatsApp channel <a href="#" className="text-primary font-bold no-underline hover:underline">Nirogyam</a>
+                  </p>
+                  <p>
+                    For everything else regarding Kidney Disease like -
+                  </p>
+                  <ul className="list-disc list-inside">
+                    <li>Prevention and Precautions</li>
+                    <li>Lifestyle or diet</li>
+                    <li>Vaccination</li>
+                    <li>Dialysis or Kidney Transplant</li>
+                    <li>and much more . . . you can ask me below. . .</li>
+                  </ul>
+                   <p className="text-xs italic">
+                    (मराठी, English, हिंदी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, বাংলা or any other language)
+                  </p>
+                  <p className="text-xs font-bold border-t border-muted pt-2 mt-4">
+                    This is an automated chatbot response. The responses are for information purpose only, and should not be construed as medical advise!
+                  </p>
+                  <p className="text-xs font-bold">
+                    In case of an emergency or urgent care please connect with the nearest hospital.
+                  </p>
+                </div>
               </div>
             )}
             {messages.map((message, index) => (
@@ -354,7 +383,7 @@ export default function Chat() {
                   className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/50 hover:bg-black/75 text-white"
                   onClick={() => {
                     setImagePreview(null)
-                    if(fileInputrRef.current) fileInputRef.current.value = "";
+                    if(fileInputRef.current) fileInputRef.current.value = "";
                   }}
                 >
                   <XCircle className="w-4 h-4" />
