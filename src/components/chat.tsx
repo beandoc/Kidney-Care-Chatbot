@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, type FormEvent } from "react";
-import { Send, Bot, User, CornerDownLeft, ImagePlus, Mic, MicOff, Star } from "lucide-react";
+import { Send, Bot, User, ImagePlus, Mic, MicOff, Star, XCircle } from "lucide-react";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { KidneyIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
-import { Separator } from "./ui/separator";
 
 type Message = {
   role: "user" | "assistant";
@@ -30,6 +29,8 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -53,22 +54,29 @@ export default function Chat() {
     }
   }, [input]);
 
-  const handleSendMessage = async (messageContent: string, imageUri?: string) => {
+  const handleSendMessage = async (messageContent: string, imageUri?: string | null) => {
     if ((!messageContent.trim() && !imageUri) || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: messageContent, image: imageUri };
+    const userMessage: Message = { role: "user", content: messageContent, image: imageUri ?? undefined };
     setMessages((prev) => [...prev, userMessage]);
-    if (messageContent === input) {
-      setInput("");
-    }
+    setInput("");
+    setImagePreview(null);
     setIsLoading(true);
 
     try {
       if (imageUri) {
-         const result = await getFoodAnalysis(imageUri);
-         const assistantMessage: Message = {
+         const result = await getFoodAnalysis({photoDataUri: imageUri, question: messageContent});
+         let assistantContent = `I have analyzed the image. It appears to be **${result.foodName}**.`;
+         
+         if (result.answer) {
+          assistantContent += `\n\n${result.answer}`;
+         }
+
+         assistantContent += `\n\nHere is the nutritional information: \n- **Calories:** ${result.calories} kcal\n- **Protein:** ${result.protein}g`;
+
+          const assistantMessage: Message = {
             role: 'assistant',
-            content: `I have analyzed the image. It appears to be **${result.foodName}**. Here is the nutritional information: \n\n- **Calories:** ${result.calories} kcal\n- **Protein:** ${result.protein}g`,
+            content: assistantContent,
           };
           setMessages(prev => [...prev, assistantMessage]);
 
@@ -110,7 +118,7 @@ export default function Chat() {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const dataUri = reader.result as string;
-        await handleSendMessage("Analyze this image:", dataUri)
+        setImagePreview(dataUri);
       };
       reader.readAsDataURL(file);
     }
@@ -178,7 +186,7 @@ export default function Chat() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await handleSendMessage(input);
+    await handleSendMessage(input, imagePreview);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -287,45 +295,64 @@ export default function Chat() {
             className="hidden"
             disabled={isLoading || isRecording}
           />
-          <div className="flex-1 relative">
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
-              className="flex-1 text-base bg-secondary border-transparent focus:border-primary focus:ring-primary rounded-2xl resize-none min-h-[50px] max-h-[200px] pr-20"
-              disabled={isLoading || isRecording}
-              autoComplete="off"
-              aria-label="Chat input"
-              rows={1}
-            />
-            <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center">
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="icon" 
-                className="h-10 w-10 shrink-0 rounded-full"
-                onClick={() => fileInputRef.current?.click()}
+          <div className="flex-1 flex flex-col gap-2">
+            {imagePreview && (
+              <div className="relative w-24 h-24 rounded-md overflow-hidden">
+                <Image src={imagePreview} alt="Image preview" layout="fill" objectFit="cover" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/50 hover:bg-black/75 text-white"
+                  onClick={() => {
+                    setImagePreview(null)
+                    if(fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                >
+                  <XCircle className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+            <div className="flex-1 relative">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={imagePreview ? "Ask a question about the image..." : "Type your message..."}
+                className="flex-1 text-base bg-secondary border-transparent focus:border-primary focus:ring-primary rounded-2xl resize-none min-h-[50px] max-h-[200px] pr-20"
                 disabled={isLoading || isRecording}
-                aria-label="Upload an image"
-              >
-                <ImagePlus className="w-5 h-5"/>
-              </Button>
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleVoiceRecording}
-                disabled={isLoading}
-                className={cn("h-10 w-10 shrink-0 rounded-full", isRecording && "text-red-500 bg-red-500/10")}
-                aria-label={isRecording ? "Stop recording" : "Start recording"}
-              >
-                {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-              </Button>
+                autoComplete="off"
+                aria-label="Chat input"
+                rows={1}
+              />
+              <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-10 w-10 shrink-0 rounded-full"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isLoading || isRecording || !!imagePreview}
+                  aria-label="Upload an image"
+                >
+                  <ImagePlus className="w-5 h-5"/>
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleVoiceRecording}
+                  disabled={isLoading}
+                  className={cn("h-10 w-10 shrink-0 rounded-full", isRecording && "text-red-500 bg-red-500/10")}
+                  aria-label={isRecording ? "Stop recording" : "Start recording"}
+                >
+                  {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </Button>
+              </div>
             </div>
           </div>
-          <Button type="submit" size="icon" className="h-12 w-12 self-end shrink-0 rounded-full" disabled={isLoading || !input.trim() || isRecording} aria-label="Send message">
+          <Button type="submit" size="icon" className="h-12 w-12 self-end shrink-0 rounded-full" disabled={isLoading || (!input.trim() && !imagePreview) || isRecording} aria-label="Send message">
             <Send className="w-5 h-5" />
           </Button>
         </form>
