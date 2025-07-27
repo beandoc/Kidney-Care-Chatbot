@@ -32,22 +32,6 @@ export async function analyzeFoodImage(input: AnalyzeFoodImageInput): Promise<An
   return analyzeFoodImageFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'analyzeFoodImagePrompt',
-  input: {schema: AnalyzeFoodImageInputSchema},
-  output: {schema: AnalyzeFoodImageOutputSchema},
-  prompt: `You are a helpful nutrition assistant. Analyze the food in the following image.
-{{#if question}}
-Answer the user's question: {{{question}}}
-In addition to answering the question, provide an estimate for the food's name, calories and protein content.
-{{else}}
-Provide an estimate for its name, calories and protein content.
-{{/if}}
-
-Image: {{media url=photoDataUri}}`,
-  model: textModel,
-});
-
 const analyzeFoodImageFlow = ai.defineFlow(
   {
     name: 'analyzeFoodImageFlow',
@@ -55,7 +39,36 @@ const analyzeFoodImageFlow = ai.defineFlow(
     outputSchema: AnalyzeFoodImageOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    
+    const prompt = `You are a helpful nutrition assistant. Analyze the food in the following image.
+{{#if question}}
+Answer the user's question: {{{question}}}
+In addition to answering the question, provide an estimate for the food's name, calories and protein content.
+{{else}}
+Provide an estimate for its name, calories and protein content.
+{{/if}}
+
+Image: {{media url=photoDataUri}}`
+
+    let model = textModel[0];
+    try {
+      const {output} = await ai.generate({
+        model: model,
+        prompt: prompt,
+        input: input,
+        output: { schema: AnalyzeFoodImageOutputSchema }
+      });
+      return output!;
+    } catch (e) {
+      console.error(`Error with model ${model}, trying fallback`, e);
+      model = textModel[1];
+      const {output} = await ai.generate({
+        model: model,
+        prompt: prompt,
+        input: input,
+        output: { schema: AnalyzeFoodImageOutputSchema }
+      });
+      return output!;
+    }
   }
 );

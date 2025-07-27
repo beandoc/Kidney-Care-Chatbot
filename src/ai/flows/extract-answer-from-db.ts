@@ -63,16 +63,32 @@ ${context}
 
 QUESTION:
 ${input.question}`;
-
-    const {output} = await ai.generate({
-      model: textModel,
-      history,
-      prompt: prompt,
-      system: systemPrompt,
-      output: {
-        schema: ExtractAnswerOutputSchema,
-      },
-    });
-    return output!;
+    
+    let model = textModel[0];
+    try {
+      const {output} = await ai.generate({
+        model: model,
+        history,
+        prompt: prompt,
+        system: systemPrompt,
+        output: {
+          schema: ExtractAnswerOutputSchema,
+        },
+      });
+      return output!;
+    } catch (e) {
+      console.error(`Error with model ${model}, trying fallback`, e);
+      model = textModel[1];
+      const {output} = await ai.generate({
+        model: model,
+        history,
+        prompt: prompt,
+        system: systemPrompt,
+        output: {
+          schema: ExtractAnswerOutputSchema,
+        },
+      });
+      return output!;
+    }
   }
 );

@@ -28,15 +28,6 @@ export async function transcribeAudio(input: TranscribeAudioInput): Promise<Tran
   return transcribeAudioFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'transcribeAudioPrompt',
-  input: {schema: TranscribeAudioInputSchema},
-  output: {schema: TranscribeAudioOutputSchema},
-  prompt: `Transcribe the following audio recording.
-
-Audio: {{media url=audioDataUri}}`,
-  model: textModel,
-});
 
 const transcribeAudioFlow = ai.defineFlow(
   {
@@ -45,7 +36,29 @@ const transcribeAudioFlow = ai.defineFlow(
     outputSchema: TranscribeAudioOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    const prompt = `Transcribe the following audio recording.
+
+Audio: {{media url=audioDataUri}}`;
+
+    let model = textModel[0];
+    try {
+        const {output} = await ai.generate({
+            model: model,
+            prompt: prompt,
+            input: input,
+            output: { schema: TranscribeAudioOutputSchema }
+        });
+        return output!;
+    } catch (e) {
+        console.error(`Error with model ${model}, trying fallback`, e);
+        model = textModel[1];
+        const {output} = await ai.generate({
+            model: model,
+            prompt: prompt,
+            input: input,
+            output: { schema: TranscribeAudioOutputSchema }
+        });
+        return output!;
+    }
   }
 );
