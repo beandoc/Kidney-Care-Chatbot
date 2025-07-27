@@ -7,7 +7,7 @@
  * - AnalyzeFoodImageOutput - The return type for the analyzeFoodImage function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, textModel} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const AnalyzeFoodImageInputSchema = z.object({
@@ -45,6 +45,7 @@ Provide an estimate for its name, calories and protein content.
 {{/if}}
 
 Image: {{media url=photoDataUri}}`,
+  model: textModel,
 });
 
 const analyzeFoodImageFlow = ai.defineFlow(

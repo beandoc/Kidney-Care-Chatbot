@@ -7,7 +7,7 @@
  * - ExtractAnswerOutput - The return type for the extractAnswer function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, textModel} from '@/ai/genkit';
 import {Message, Role} from 'genkit';
 import {z} from 'genkit';
 import { getRelevantDocuments } from '@/services/knowledge-base';
@@ -65,7 +65,7 @@ QUESTION:
 ${input.question}`;
 
     const {output} = await ai.generate({
-      model: 'googleai/gemini-2.0-flash',
+      model: textModel,
       history,
       prompt: prompt,
       system: systemPrompt,
