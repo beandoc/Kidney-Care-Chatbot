@@ -1,42 +1,46 @@
-# Chronic Kidney Disease (CKD)
+# Understanding the Stages of CKD
+Chronic Kidney Disease (CKD) signifies a gradual loss of kidney function over time. Your kidneys are vital for filtering waste, managing blood pressure, and maintaining overall balance in your body. Understanding the stage of your CKD is key to determining the right treatment plan.
 
-## What is Chronic Kidney Disease?
+Being diagnosed with a kidney condition can be a scary time. Find out about treatments across the five stages of chronic kidney disease (CKD).
 
-Chronic kidney disease (CKD) means your kidneys are damaged and can't filter blood the way they should. This damage happens slowly over a long period of time. The disease is called "chronic" because the damage to your kidneys is long-term and usually doesn't get better. As CKD gets worse, wastes can build to high levels in your blood and make you feel sick. You may develop complications like high blood pressure, anemia (low blood count), weak bones, poor nutritional health, and nerve damage.
+## How CKD is Evaluated
+Kidney health is primarily assessed through two simple tests: the estimated Glomerular Filtration Rate (eGFR), which is a blood test, and the urine albumin-to-creatinine ratio (uACR), a urine test. Both are essential for a complete understanding of your kidney function. To confirm a CKD diagnosis, these tests are typically repeated over three months to verify long-term damage. An eGFR below 60 or a uACR above 30 for three months or more can indicate kidney disease.
 
-## Stages of CKD
+## The 5 Stages of CKD
+### Stage 1 CKD
+Kidney damage present but function is near normal.
+- **eGFR:** 90 or higher
+- **uACR:** 30+
 
-CKD has five stages, from very mild damage in stage 1 to complete kidney failure in stage 5. The stages are based on the glomerular filtration rate (GFR), which is a measure of how well your kidneys are working.
+### Stage 2 CKD
+Mild loss of kidney function.
+- **eGFR:** 60-89
+- **uACR:** 30+
 
--   **Stage 1 (GFR 90 or higher):** Mild kidney damage. Your kidneys are still working well, but you may have signs of damage, such as protein in your urine.
--   **Stage 2 (GFR 60-89):** Mild loss of kidney function.
--   **Stage 3a (GFR 45-59):** Mild to moderate loss of kidney function.
--   **Stage 3b (GFR 30-44):** Moderate to severe loss of kidney function.
--   **Stage 4 (GFR 15-29):** Severe loss of kidney function. At this stage, you will likely need to start preparing for dialysis or a kidney transplant.
--   **Stage 5 (GFR less than 15):** Kidney failure (also called end-stage renal disease, or ESRD). Your kidneys have lost nearly all their ability to function. You will need dialysis or a kidney transplant to live.
+### Stage 3a CKD
+Mild to moderate loss of kidney function.
+- **eGFR:** 45-59
 
-## Symptoms of CKD
+### Stage 3b CKD
+Moderate to severe loss of kidney function.
+- **eGFR:** 30-44
 
-In the early stages of CKD, you may not have any symptoms. Many people don't realize they have a problem until their kidney function is very low. As the disease progresses, symptoms can include:
+### Stage 4 CKD
+Severe loss of kidney function.
+- **eGFR:** 15-29
 
--   Feeling more tired and having less energy
--   Trouble concentrating
--   Poor appetite
--   Trouble sleeping
--   Muscle cramping at night
--   Swollen feet and ankles
--   Puffiness around your eyes, especially in the morning
--   Dry, itchy skin
--   Needing to urinate more often, especially at night
+### Stage 5 CKD
+Kidney failure, requiring dialysis or transplant.
+- **eGFR:** less than 15
 
-## How is CKD Managed?
+## Risk Factors for CKD
+Anyone can develop CKD, but certain factors increase your risk. Often, it's a combination of physical, environmental, and social factors. Knowing the risks is the first step toward early detection, as CKD often has no early symptoms.
 
-The goals of treatment are to slow down the progression of kidney disease and manage complications. Treatment includes:
-
--   **Controlling Blood Pressure:** This is the most important step. ACE inhibitors and ARBs are common blood pressure medications that also protect the kidneys.
--   **Managing Blood Sugar:** For people with diabetes, keeping blood sugar levels in a target range is crucial.
--   **A Kidney-Friendly Diet:** You may need to limit sodium, protein, phosphorus, and potassium in your diet. A dietitian can help you create a meal plan.
--   **Medications:** You may need medicines to manage complications like anemia or high cholesterol.
--   **Avoiding Certain Medications:** Some over-the-counter pain relievers (like NSAIDs) can be harmful to your kidneys. Always talk to your doctor before taking any new medication.
-
-By managing CKD with lifestyle changes and medication, you can help slow down the damage to your kidneys and maintain your quality of life.
+- Diabetes
+- High Blood Pressure (Hypertension)
+- Heart Disease and/or Heart Failure
+- Obesity (BMI of 30 or more)
+- Over Age 60
+- Family History of CKD or kidney failure
+- Acute Kidney Injury (Personal history of AKI)
+- Smoking and/or tobacco use
