@@ -1,46 +1,43 @@
-# Understanding the Stages of CKD
-Chronic Kidney Disease (CKD) signifies a gradual loss of kidney function over time. Your kidneys are vital for filtering waste, managing blood pressure, and maintaining overall balance in your body. Understanding the stage of your CKD is key to determining the right treatment plan.
+# About chronic kidney disease (CKD)
+Your kidneys do many important jobs. Some of the ways they keep your whole body in balance include:
 
-Being diagnosed with a kidney condition can be a scary time. Find out about treatments across the five stages of chronic kidney disease (CKD).
+* Removing natural waste products and extra water from your body
+* Helping make red blood cells
+* Balancing important minerals in your body
+* Helping maintain your blood pressure
+* Keeping your bones healthy
+Chronic kidney disease (CKD) is when the kidneys have become damaged over time (for at least 3 months) and have a hard time doing all their important jobs. CKD also increases the risk of other health problems like heart disease and stroke. Developing CKD is usually a very slow process with very few symptoms at first. So, CKD is divided into 5 stages to help guide treatment decisions.
 
-## How CKD is Evaluated
-Kidney health is primarily assessed through two simple tests: the estimated Glomerular Filtration Rate (eGFR), which is a blood test, and the urine albumin-to-creatinine ratio (uACR), a urine test. Both are essential for a complete understanding of your kidney function. To confirm a CKD diagnosis, these tests are typically repeated over three months to verify long-term damage. An eGFR below 60 or a uACR above 30 for three months or more can indicate kidney disease.
+## Signs and symptoms
+Many people living with CKD do not have any symptoms until the more advanced stages and/or complications develop. If symptoms do happen, they may include:
 
-## The 5 Stages of CKD
-### Stage 1 CKD
-Kidney damage present but function is near normal.
-- **eGFR:** 90 or higher
-- **uACR:** 30+
+* Foamy urine
+* Urinating (peeing) more often or less often than usual
+* Itchy and/or dry skin
+* Feeling tired
+* Nausea
+* Loss of appetite
+* Weight loss without trying to lose weight
+People who have more advanced stages of CKD may also notice:
 
-### Stage 2 CKD
-Mild loss of kidney function.
-- **eGFR:** 60-89
-- **uACR:** 30+
+* Trouble concentrating
+* Numbness or swelling in your arms, legs, ankles, or feet
+* Achy muscles or cramping
+* Shortness of breath
+* Vomiting
+* Trouble sleeping
+* Breath smells like ammonia
 
-### Stage 3a CKD
-Mild to moderate loss of kidney function.
-- **eGFR:** 45-59
+## Causes
+Content for causes will be added here.
 
-### Stage 3b CKD
-Moderate to severe loss of kidney function.
-- **eGFR:** 30-44
+## Complications
+Content for complications will be added here.
 
-### Stage 4 CKD
-Severe loss of kidney function.
-- **eGFR:** 15-29
+## Diagnosis
+Content for diagnosis will be added here.
 
-### Stage 5 CKD
-Kidney failure, requiring dialysis or transplant.
-- **eGFR:** less than 15
+## Treatment
+Content for treatment will be added here.
 
-## Risk Factors for CKD
-Anyone can develop CKD, but certain factors increase your risk. Often, it's a combination of physical, environmental, and social factors. Knowing the risks is the first step toward early detection, as CKD often has no early symptoms.
-
-- Diabetes
-- High Blood Pressure (Hypertension)
-- Heart Disease and/or Heart Failure
-- Obesity (BMI of 30 or more)
-- Over Age 60
-- Family History of CKD or kidney failure
-- Acute Kidney Injury (Personal history of AKI)
-- Smoking and/or tobacco use
+## Preparing for your appointment
