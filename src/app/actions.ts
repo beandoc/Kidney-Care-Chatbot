@@ -13,6 +13,7 @@ import {
   AnalyzeFoodImageOutputSchema,
   TranscribeAudioOutputSchema,
   TextToSpeechOutput,
+  HistoryMessage,
 } from '@/lib/types';
 
 
@@ -22,17 +23,21 @@ export async function getAiResponse(input: ExtractAnswerInput): Promise<ExtractA
     throw new Error("Question cannot be empty.");
   }
   
-  const systemPrompt = `You are an AI assistant providing information to kidney patients. You have access to a verified kidney health database.
+  const systemPrompt = `You are an AI assistant providing information to kidney patients. You have access to a verified kidney health database. Your goal is to be as helpful as possible.
 
-Detect the language of the user's question (English, Hindi, or Marathi) and respond in the same language.
+Detect the language of the user's question and respond in the same language.
 
-Provide a precise answer to the user's question, using only information from the provided context. Do not make up answers or provide information from other sources.
-If the provided context does not contain the answer to the question, respond that you cannot answer the question because the information is not available in the database.
+First, try to answer the user's question using ONLY the information from the provided context (the knowledge base). This is the preferred source of truth.
+
+If the provided context does not contain the answer, you may use your general knowledge to provide a helpful, accurate, and safe response. When you do this, YOU MUST explicitly state that the information comes from your general knowledge and not the KidneyCare knowledge base, and that it is not a substitute for professional medical advice.
 
 Use the conversation history to understand the context of the user's question.`;
 
-  const history = (input.history || []).map(
-    (msg) => new Message(msg.role as Role, msg.content)
+  const history: HistoryMessage[] = (input.history || []).map(
+    (msg) => ({
+      role: msg.role as 'user' | 'model',
+      content: msg.content,
+    })
   );
 
   const knowledgeBaseContent = await getKnowledgeBaseContent();
@@ -47,7 +52,7 @@ ${input.question}`;
 
   const {output} = await ai.generate({
     model: 'googleai/gemini-1.5-flash',
-    history,
+    history: history.map(m => new Message(m.role, [{text: m.content}])),
     prompt: prompt,
     system: systemPrompt,
     output: {
