@@ -1,7 +1,0 @@
-import { config } from 'dotenv';
-config();
-
-import '@/ai/flows/extract-answer-from-db.ts';
-import '@/ai/flows/analyze-food-image.ts';
-import '@/ai/flows/transcribe-audio.ts';
-import '@/ai/flows/text-to-speech.ts';
