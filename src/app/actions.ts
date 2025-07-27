@@ -42,10 +42,8 @@ Use the conversation history to understand the context of the user's question.`;
 
   const knowledgeBaseContent = await getKnowledgeBaseContent();
   
-  const context = knowledgeBaseContent;
-
   const prompt = `CONTEXT:
-${context}
+${knowledgeBaseContent}
 
 QUESTION:
 ${input.question}`;
