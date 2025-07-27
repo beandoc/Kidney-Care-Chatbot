@@ -51,7 +51,7 @@ QUESTION:
 ${input.question}`;
 
   const {output} = await ai.generate({
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-1.5-pro-latest',
     history: history.map(m => new Message(m.role, [{text: m.content}])),
     prompt: prompt,
     system: systemPrompt,
@@ -79,7 +79,7 @@ Provide an estimate for its name, calories and protein content.
 Image: {{media url=photoDataUri}}`
   
   const {output} = await ai.generate({
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-1.5-pro-latest',
     prompt: promptTemplate,
     input: input,
     output: { schema: AnalyzeFoodImageOutputSchema }
@@ -98,7 +98,7 @@ export async function getTranscript(audioDataUri: string) {
 Audio: {{media url=audioDataUri}}`;
 
   const {output} = await ai.generate({
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-1.5-pro-latest',
     prompt: promptTemplate,
     input: { audioDataUri },
     output: { schema: TranscribeAudioOutputSchema }
