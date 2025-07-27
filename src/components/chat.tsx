@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, type FormEvent } from "react";
 import { Send, Bot, User, CornerDownLeft, ImagePlus, Mic, MicOff, Star } from "lucide-react";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getAiResponse, getFoodAnalysis, getTranscript } from "@/app/actions";
@@ -35,6 +35,7 @@ export default function Chat() {
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -42,6 +43,15 @@ export default function Chat() {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [messages]);
+  
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      const scrollHeight = textarea.scrollHeight;
+      textarea.style.height = `${scrollHeight}px`;
+    }
+  }, [input]);
 
   const handleSendMessage = async (messageContent: string, imageUri?: string) => {
     if ((!messageContent.trim() && !imageUri) || isLoading) return;
@@ -171,6 +181,13 @@ export default function Chat() {
     await handleSendMessage(input);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e as any);
+    }
+  }
+
   return (
     <Card className="w-full max-w-2xl h-[90vh] flex flex-col shadow-2xl rounded-2xl">
       <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
@@ -261,8 +278,8 @@ export default function Chat() {
       </CardContent>
 
       <CardFooter className="p-4 border-t">
-        <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full">
-           <Input
+        <form onSubmit={handleSubmit} className="flex items-start gap-2 w-full">
+           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
@@ -270,38 +287,45 @@ export default function Chat() {
             className="hidden"
             disabled={isLoading || isRecording}
           />
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 h-12 text-base bg-secondary border-transparent focus:border-primary focus:ring-primary rounded-full"
-            disabled={isLoading || isRecording}
-            autoComplete="off"
-            aria-label="Chat input"
-          />
-           <Button 
-            type="button" 
-            variant="ghost" 
-            size="icon" 
-            className="h-12 w-12 shrink-0 rounded-full"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isLoading || isRecording}
-            aria-label="Upload an image"
-          >
-            <ImagePlus className="w-5 h-5"/>
-          </Button>
-          <Button 
-            type="button" 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleVoiceRecording}
-            disabled={isLoading}
-            className={cn("h-12 w-12 shrink-0 rounded-full", isRecording && "text-red-500 bg-red-500/10")}
-            aria-label={isRecording ? "Stop recording" : "Start recording"}
-          >
-            {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-          </Button>
-          <Button type="submit" size="icon" className="h-12 w-12 shrink-0 rounded-full" disabled={isLoading || !input.trim() || isRecording} aria-label="Send message">
+          <div className="flex-1 relative">
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type your message..."
+              className="flex-1 text-base bg-secondary border-transparent focus:border-primary focus:ring-primary rounded-2xl resize-none min-h-[50px] max-h-[200px] pr-20"
+              disabled={isLoading || isRecording}
+              autoComplete="off"
+              aria-label="Chat input"
+              rows={1}
+            />
+            <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10 shrink-0 rounded-full"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading || isRecording}
+                aria-label="Upload an image"
+              >
+                <ImagePlus className="w-5 h-5"/>
+              </Button>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleVoiceRecording}
+                disabled={isLoading}
+                className={cn("h-10 w-10 shrink-0 rounded-full", isRecording && "text-red-500 bg-red-500/10")}
+                aria-label={isRecording ? "Stop recording" : "Start recording"}
+              >
+                {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              </Button>
+            </div>
+          </div>
+          <Button type="submit" size="icon" className="h-12 w-12 self-end shrink-0 rounded-full" disabled={isLoading || !input.trim() || isRecording} aria-label="Send message">
             <Send className="w-5 h-5" />
           </Button>
         </form>
