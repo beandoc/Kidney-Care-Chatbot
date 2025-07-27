@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, useRef, useEffect, type FormEvent } from "react";
-import { SendHorizonal, Bot, User, CornerDownLeft, ImagePlus } from "lucide-react";
+import { SendHorizonal, Bot, User, CornerDownLeft, ImagePlus, Mic, MicOff } from "lucide-react";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getAiResponse, getFoodAnalysis } from "@/app/actions";
+import { getAiResponse, getFoodAnalysis, getTranscript } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { KidneyIcon } from "@/components/icons";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Message = {
   role: "user" | "assistant";
@@ -24,6 +23,10 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
   const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -33,6 +36,37 @@ export default function Chat() {
       scrollAreaViewportRef.current.scrollTop = scrollAreaViewportRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const handleSendMessage = async (messageContent: string) => {
+    if (!messageContent.trim() || isLoading) return;
+
+    const userMessage: Message = { role: "user", content: messageContent };
+    setMessages((prev) => [...prev, userMessage]);
+    if (messageContent === input) {
+      setInput("");
+    }
+    setIsLoading(true);
+
+    try {
+      const response = await getAiResponse(messageContent);
+      const assistantMessage: Message = { role: "assistant", content: response.answer };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to get a response. Please try again later.",
+      });
+      const errorMessage: Message = {
+        role: "assistant",
+        content: "I'm sorry, but I'm having trouble connecting. Please try again in a moment.",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -76,34 +110,69 @@ export default function Chat() {
     }
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
+  const handleVoiceRecording = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
 
     try {
-      const response = await getAiResponse(input);
-      const assistantMessage: Message = { role: "assistant", content: response.answer };
-      setMessages((prev) => [...prev, assistantMessage]);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorderRef.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const dataUri = reader.result as string;
+          setIsLoading(true);
+          try {
+            const { transcript } = await getTranscript(dataUri);
+            if (transcript) {
+              await handleSendMessage(transcript);
+            } else {
+               toast({
+                variant: "destructive",
+                title: "Speech-to-Text Error",
+                description: "Could not understand audio, please try again",
+              });
+            }
+          } catch(e) {
+             toast({
+              variant: "destructive",
+              title: "Speech-to-Text Error",
+              description: "Could not process audio, please try again",
+            });
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        reader.readAsDataURL(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
     } catch (error) {
-      console.error("Error getting AI response:", error);
+      console.error("Error accessing microphone:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to get a response. Please try again later.",
+        title: "Microphone Error",
+        description: "Could not access microphone. Please check your browser permissions.",
       });
-      const errorMessage: Message = {
-        role: "assistant",
-        content: "I'm sorry, but I'm having trouble connecting. Please try again in a moment.",
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
     }
+  };
+
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await handleSendMessage(input);
   };
 
   return (
@@ -196,7 +265,7 @@ export default function Chat() {
             variant="ghost" 
             size="icon" 
             onClick={() => fileInputRef.current?.click()}
-            disabled={isLoading}
+            disabled={isLoading || isRecording}
             aria-label="Upload an image"
           >
             <ImagePlus className="w-5 h-5"/>
@@ -207,18 +276,29 @@ export default function Chat() {
             accept="image/*"
             onChange={handleImageUpload}
             className="hidden"
-            disabled={isLoading}
+            disabled={isLoading || isRecording}
           />
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question or upload an image..."
+            placeholder="Ask a question, upload an image or use voice..."
             className="flex-1"
-            disabled={isLoading}
+            disabled={isLoading || isRecording}
             autoComplete="off"
             aria-label="Chat input"
           />
-          <Button type="submit" size="icon" disabled={isLoading || !input.trim()} aria-label="Send message">
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleVoiceRecording}
+            disabled={isLoading}
+            className={cn(isRecording && "text-red-500")}
+            aria-label={isRecording ? "Stop recording" : "Start recording"}
+          >
+            {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </Button>
+          <Button type="submit" size="icon" disabled={isLoading || !input.trim() || isRecording} aria-label="Send message">
             <SendHorizonal className="w-5 h-5" />
           </Button>
         </form>
