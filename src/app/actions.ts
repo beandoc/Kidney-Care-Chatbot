@@ -1,16 +1,16 @@
 "use server";
 
-import { extractAnswer, type ExtractAnswerOutput } from "@/ai/flows/extract-answer-from-db";
+import { extractAnswer, type ExtractAnswerOutput, type ExtractAnswerInput } from "@/ai/flows/extract-answer-from-db";
 import { analyzeFoodImage, type AnalyzeFoodImageOutput } from "@/ai/flows/analyze-food-image";
 import { transcribeAudio, type TranscribeAudioOutput } from "@/ai/flows/transcribe-audio";
 
-export async function getAiResponse(question: string): Promise<ExtractAnswerOutput> {
-  if (!question) {
+export async function getAiResponse(input: ExtractAnswerInput): Promise<ExtractAnswerOutput> {
+  if (!input.question) {
     throw new Error("Question cannot be empty.");
   }
   
   try {
-    const response = await extractAnswer({ question });
+    const response = await extractAnswer(input);
     return response;
   } catch (error) {
     console.error("AI Error:", error);

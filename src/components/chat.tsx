@@ -20,6 +20,11 @@ type Message = {
   image?: string;
 };
 
+type HistoryMessage = {
+  role: "user" | "model";
+  content: string;
+};
+
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -58,7 +63,14 @@ export default function Chat() {
           setMessages(prev => [...prev, assistantMessage]);
 
       } else {
-        const response = await getAiResponse(messageContent);
+        const history: HistoryMessage[] = messages
+          .filter(m => !m.image)
+          .map(m => ({
+            role: m.role === 'assistant' ? 'model' : 'user',
+            content: m.content
+          }));
+
+        const response = await getAiResponse({ question: messageContent, history });
         const assistantMessage: Message = { role: "assistant", content: response.answer };
         setMessages((prev) => [...prev, assistantMessage]);
       }

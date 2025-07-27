@@ -8,12 +8,19 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {Message, Role, generationAndUsage} from 'genkit';
 import {z} from 'genkit';
+
+const HistoryMessageSchema = z.object({
+  role: z.enum(['user', 'model']),
+  content: z.string(),
+});
 
 const ExtractAnswerInputSchema = z.object({
   question: z
     .string()
     .describe('The question asked by the user in English, Hindi, or Marathi.'),
+  history: z.array(HistoryMessageSchema).optional().describe('The conversation history.'),
 });
 export type ExtractAnswerInput = z.infer<typeof ExtractAnswerInputSchema>;
 
@@ -26,17 +33,13 @@ export async function extractAnswer(input: ExtractAnswerInput): Promise<ExtractA
   return extractAnswerFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'extractAnswerPrompt',
-  input: {schema: ExtractAnswerInputSchema},
-  output: {schema: ExtractAnswerOutputSchema},
-  prompt: `You are an AI assistant providing information to kidney patients.  You have access to a verified kidney health database.
+const systemPrompt = `You are an AI assistant providing information to kidney patients. You have access to a verified kidney health database.
 
-  User's question: {{{question}}}
+Provide a precise answer to the user's question, using only information from the database. Do not make up answers or provide information from other sources.
+If the database does not contain the answer to the question, respond that you cannot answer the question because the information is not available in the database.
 
-  Provide a precise answer to the user's question, using only information from the database. Do not make up answers or provide information from other sources.
-  If the database does not contain the answer to the question, respond that you cannot answer the question because the information is not available in the database.`,
-});
+Use the conversation history to understand the context of the user's question.`;
+
 
 const extractAnswerFlow = ai.defineFlow(
   {
@@ -45,7 +48,19 @@ const extractAnswerFlow = ai.defineFlow(
     outputSchema: ExtractAnswerOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const history = (input.history || []).map(
+      (msg) => new Message(msg.role as Role, msg.content)
+    );
+
+    const {output} = await ai.generate({
+      model: 'googleai/gemini-2.0-flash',
+      history,
+      prompt: input.question,
+      system: systemPrompt,
+      output: {
+        schema: ExtractAnswerOutputSchema,
+      },
+    });
     return output!;
   }
 );
