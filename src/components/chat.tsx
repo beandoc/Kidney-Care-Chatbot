@@ -20,76 +20,65 @@ type Message = {
   image?: string;
 };
 
-const Typewriter = ({ text, onFinished }: { text: string, onFinished?: () => void }) => {
-  const [displayedText, setDisplayedText] = useState("");
-  const index = useRef(0);
-
-  useEffect(() => {
-    if (!text) return;
-    const intervalId = setInterval(() => {
-      if (index.current < text.length) {
-        setDisplayedText((prev) => prev + text.charAt(index.current));
-        index.current++;
-      } else {
-        clearInterval(intervalId);
-        if (onFinished) {
-          onFinished();
-        }
-      }
-    }, 25);
-    return () => clearInterval(intervalId);
-  }, [text, onFinished]);
-
-  return <p>{displayedText}</p>;
-};
-
 const InitialMessage = () => {
-    const [step, setStep] = useState(0);
+  const [displayedText, setDisplayedText] = useState("");
+  const fullText1 = "Hello! I'm here to assist you with all your questions about Kidney Health, the Kidney Wellness Clinic or Dr Sachin Srivastava.";
+  const fullText2 = "Whether you need to schedule an in-clinic appointment (preferred) or an online consult, learn more about our services, or get more information. I'm here to help you every step of the way. Let's ensure you have a wonderful experience!";
+  
+  useEffect(() => {
+    let currentIndex = 0;
+    const textToType = fullText1 + "\n\n" + fullText2;
+    if (displayedText.length < textToType.length) {
+      const timer = setInterval(() => {
+        setDisplayedText(prev => prev + textToType[currentIndex]);
+        currentIndex++;
+        if (currentIndex === textToType.length) {
+          clearInterval(timer);
+        }
+      }, 50);
+      return () => clearInterval(timer);
+    }
+  }, [displayedText, fullText1, fullText2]);
 
-    const messages = [
-        "Hello! I'm here to assist you with all your questions about Kidney Health, the Kidney Wellness Clinic or Dr Sachin Srivastava.",
-        "Whether you need to schedule an in-clinic appointment (preferred) or an online consult, learn more about our services, or get more information. I'm here to help you every step of the way. Let's ensure you have a wonderful experience!",
-    ];
 
-    return (
-        <div className="prose prose-sm max-w-full text-left bg-secondary p-4 rounded-lg space-y-4">
-            {messages.slice(0, step + 1).map((msg, i) => (
-                <Typewriter key={i} text={msg} onFinished={() => (i === step && step < messages.length - 1) ? setStep(s => s + 1) : null} />
-            ))}
-            {step >= messages.length - 1 && (
-                <>
-                    <p className="text-xs italic">
-                        (मराठी, English, हिंदी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, বাংলা or any other language)
-                    </p>
-                    <p>
-                        <a href="https://nirogyam.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-primary font-bold no-underline hover:underline">ACCESS OUR WEBSITE</a>
-                    </p>
-                    <p>
-                        For regular health updates Follow our WhatsApp channel <a href="https://whatsapp.com/channel/0029Vb5gVK6A2pLFXRiHT23R" target="_blank" rel="noopener noreferrer" className="text-primary font-bold no-underline hover:underline">Nirogyam</a>
-                    </p>
-                    <p>
-                        For everything else regarding Kidney Disease like -
-                    </p>
-                    <ul className="list-disc list-inside">
-                        <li>Prevention and Precautions</li>
-                        <li>Lifestyle or diet</li>
-                        <li>Vaccination</li>
-                        <li>Dialysis or Kidney Transplant</li>
-                        <li>and much more . . . you can ask me below. . .</li>
-                    </ul>
-                    <p className="text-xs italic">
-                        (मराठी, English, हिंदी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, বাংলা or any other language)
-                    </p>
-                    <p className="text-xs font-bold border-t border-muted pt-2 mt-4">
-                        This is an automated chatbot response. The responses are for information purpose only, and should not be construed as medical advise!
-                    </p>
-                    <p className="text-xs font-bold">
-                        In case of an emergency or urgent care please connect with the nearest hospital.
-                    </p>
-                </>
-            )}
+  return (
+    <div className="prose prose-sm max-w-full text-left bg-secondary p-4 rounded-lg space-y-4">
+        <p className="whitespace-pre-wrap">{displayedText}</p>
+        <p>
+            <a href="https://nirogyam.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-primary font-bold no-underline hover:underline">ACCESS OUR WEBSITE</a>
+        </p>
+        <div className="font-bold">
+            <p>OPD Timings:</p>
+            <ul className="list-disc list-inside">
+                <li>Regular OPD: Tuesday & Friday</li>
+                <li>Transplant OPD: Thursday</li>
+                <li>CAPD OPD: Saturday</li>
+            </ul>
         </div>
-    );
+        <p>
+            For regular health updates Follow our WhatsApp channel <a href="https://whatsapp.com/channel/0029Vb5gVK6A2pLFXRiHT23R" target="_blank" rel="noopener noreferrer" className="text-primary font-bold no-underline hover:underline">Nirogyam</a>
+        </p>
+        <p>
+            For everything else regarding Kidney Disease like -
+        </p>
+        <ul className="list-disc list-inside">
+            <li>Prevention and Precautions</li>
+            <li>Lifestyle or diet</li>
+            <li>Vaccination</li>
+            <li>Dialysis or Kidney Transplant</li>
+            <li>and much more . . . you can ask me below. . .</li>
+        </ul>
+        <p className="text-xs italic">
+            (मराठी, English, हिंदी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, বাংলা or any other language)
+        </p>
+        <p className="text-xs font-bold border-t border-muted pt-2 mt-4">
+            This is an automated chatbot response. The responses are for information purpose only, and should not be construed as medical advise!
+        </p>
+        <p className="text-xs font-bold">
+            In case of an emergency or urgent care please connect with the nearest hospital.
+        </p>
+    </div>
+  );
 };
 
 
@@ -474,5 +463,3 @@ export default function Chat() {
     </Card>
   );
 }
-
-    
