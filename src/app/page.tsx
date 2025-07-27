@@ -2,7 +2,7 @@ import Chat from "@/components/chat";
 
 export default function Home() {
   return (
-    <main>
+    <main className="h-screen w-screen flex items-center justify-center bg-background">
       <Chat />
     </main>
   );

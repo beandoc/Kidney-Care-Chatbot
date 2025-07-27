@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, type FormEvent } from "react";
-import { SendHorizonal, Bot, User, CornerDownLeft, ImagePlus, Mic, MicOff } from "lucide-react";
+import { Send, Bot, User, CornerDownLeft, ImagePlus, Mic, MicOff, Star } from "lucide-react";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getAiResponse, getFoodAnalysis, getTranscript } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { KidneyIcon } from "@/components/icons";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
+import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
+import { Separator } from "./ui/separator";
 
 type Message = {
   role: "user" | "assistant";
@@ -27,20 +28,20 @@ export default function Chat() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (scrollAreaViewportRef.current) {
-      scrollAreaViewportRef.current.scrollTop = scrollAreaViewportRef.current.scrollHeight;
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [messages]);
 
-  const handleSendMessage = async (messageContent: string) => {
-    if (!messageContent.trim() || isLoading) return;
+  const handleSendMessage = async (messageContent: string, imageUri?: string) => {
+    if ((!messageContent.trim() && !imageUri) || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: messageContent };
+    const userMessage: Message = { role: "user", content: messageContent, image: imageUri };
     setMessages((prev) => [...prev, userMessage]);
     if (messageContent === input) {
       setInput("");
@@ -48,9 +49,19 @@ export default function Chat() {
     setIsLoading(true);
 
     try {
-      const response = await getAiResponse(messageContent);
-      const assistantMessage: Message = { role: "assistant", content: response.answer };
-      setMessages((prev) => [...prev, assistantMessage]);
+      if (imageUri) {
+         const result = await getFoodAnalysis(imageUri);
+         const assistantMessage: Message = {
+            role: 'assistant',
+            content: `I have analyzed the image. It appears to be **${result.foodName}**. Here is the nutritional information: \n\n- **Calories:** ${result.calories} kcal\n- **Protein:** ${result.protein}g`,
+          };
+          setMessages(prev => [...prev, assistantMessage]);
+
+      } else {
+        const response = await getAiResponse(messageContent);
+        const assistantMessage: Message = { role: "assistant", content: response.answer };
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
     } catch (error) {
       console.error("Error getting AI response:", error);
       toast({
@@ -65,6 +76,9 @@ export default function Chat() {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+       if(fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
   
@@ -74,37 +88,7 @@ export default function Chat() {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const dataUri = reader.result as string;
-        
-        const userMessage: Message = { role: "user", content: `Analyze this image:`, image: dataUri };
-        setMessages((prev) => [...prev, userMessage]);
-        setIsLoading(true);
-
-        try {
-          const result = await getFoodAnalysis(dataUri);
-          const assistantMessage: Message = {
-            role: 'assistant',
-            content: `I have analyzed the image. It appears to be **${result.foodName}**. Here is the nutritional information: \n\n- **Calories:** ${result.calories} kcal\n- **Protein:** ${result.protein}g`,
-          };
-          setMessages(prev => [...prev, assistantMessage]);
-        } catch (error) {
-           console.error("Error getting food analysis:", error);
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Failed to analyze the image. Please try again.",
-            });
-             const errorMessage: Message = {
-              role: "assistant",
-              content: "I'm sorry, I was unable to analyze that image.",
-            };
-            setMessages((prev) => [...prev, errorMessage]);
-        } finally {
-          setIsLoading(false);
-          // Reset file input
-          if(fileInputRef.current) {
-            fileInputRef.current.value = "";
-          }
-        }
+        await handleSendMessage("Analyze this image:", dataUri)
       };
       reader.readAsDataURL(file);
     }
@@ -176,26 +160,32 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
-      <header className="flex items-center justify-between p-4 border-b shadow-sm">
+    <Card className="w-full max-w-2xl h-[90vh] flex flex-col shadow-2xl rounded-2xl">
+      <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
-          <KidneyIcon className="w-8 h-8 text-primary" />
-          <h1 className="text-xl font-bold md:text-2xl font-headline text-primary">
-            KidneyCare Chat
+          <div className="p-2 rounded-full bg-primary/10">
+            <KidneyIcon className="w-6 h-6 text-primary" />
+          </div>
+          <h1 className="text-xl font-bold text-foreground">
+            KidneyCare AI
           </h1>
         </div>
-        <LanguageSwitcher />
-      </header>
-
-      <main className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
-          <div className="p-4 md:p-6 space-y-6">
+        <Button variant="ghost" size="icon">
+          <Star className="text-yellow-400 fill-yellow-400" />
+        </Button>
+      </CardHeader>
+      
+      <CardContent className="flex-1 p-0 overflow-hidden">
+        <ScrollArea className="h-full" viewportRef={scrollAreaRef}>
+          <div className="p-4 md:p-6 space-y-8">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center text-center text-muted-foreground pt-20">
-                <Bot className="w-16 h-16 mb-4 text-primary/80" />
-                <h2 className="text-2xl font-semibold">Welcome!</h2>
-                <p className="max-w-md mt-2">
-                  Ask me anything about kidney health or upload an image of food to get its nutritional information.
+                <div className="p-4 rounded-full bg-primary/10 mb-4">
+                  <Bot className="w-12 h-12 text-primary" />
+                </div>
+                <h2 className="text-2xl font-semibold">How can I help you today?</h2>
+                <p className="max-w-sm mt-2">
+                  Ask me about kidney health, or upload a food picture for nutritional analysis.
                 </p>
               </div>
             )}
@@ -204,33 +194,33 @@ export default function Chat() {
                 key={index}
                 className={cn(
                   "flex items-start gap-4",
-                  message.role === "user" ? "justify-end" : "justify-start"
+                  message.role === "user" ? "justify-end" : ""
                 )}
               >
                 {message.role === "assistant" && (
-                  <Avatar className="w-10 h-10 border bg-accent/50">
+                   <Avatar className="w-9 h-9 border bg-primary/10">
                     <AvatarFallback className="bg-transparent">
-                      <Bot className="w-6 h-6 text-accent-foreground" />
+                      <Bot className="w-5 h-5 text-primary" />
                     </AvatarFallback>
                   </Avatar>
                 )}
                 <div
                   className={cn(
-                    "max-w-xl p-3 rounded-2xl shadow-sm",
+                    "max-w-xl rounded-2xl p-4",
                     message.role === "user"
                       ? "bg-primary text-primary-foreground rounded-br-none"
-                      : "bg-card rounded-bl-none"
+                      : "bg-secondary text-secondary-foreground rounded-bl-none"
                   )}
                 >
                   {message.image && (
-                     <div className="mb-2">
-                        <Image src={message.image} alt="User upload" width={300} height={300} className="rounded-md"/>
+                     <div className="mb-2 -m-1">
+                        <Image src={message.image} alt="User upload" width={400} height={400} className="rounded-t-xl"/>
                      </div>
                   )}
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                 </div>
-                {message.role === "user" && (
-                  <Avatar className="w-10 h-10 border">
+                 {message.role === "user" && (
+                  <Avatar className="w-9 h-9 border">
                     <AvatarFallback>
                       <User className="w-5 h-5" />
                     </AvatarFallback>
@@ -239,13 +229,13 @@ export default function Chat() {
               </div>
             ))}
             {isLoading && (
-              <div className="flex items-start gap-4 justify-start">
-                <Avatar className="w-10 h-10 border bg-accent/50">
+              <div className="flex items-start gap-4">
+                <Avatar className="w-9 h-9 border bg-primary/10">
                   <AvatarFallback className="bg-transparent">
-                    <Bot className="w-6 h-6 text-accent-foreground" />
+                    <Bot className="w-5 h-5 text-primary" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="max-w-md p-3 rounded-2xl shadow-sm bg-card rounded-bl-none">
+                <div className="max-w-md p-4 rounded-2xl bg-secondary rounded-bl-none">
                   <div className="flex items-center space-x-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-muted-foreground animate-pulse"></span>
                     <span className="w-2.5 h-2.5 rounded-full bg-muted-foreground animate-pulse [animation-delay:0.2s]"></span>
@@ -256,21 +246,11 @@ export default function Chat() {
             )}
           </div>
         </ScrollArea>
-      </main>
+      </CardContent>
 
-      <footer className="p-4 border-t bg-background/80 backdrop-blur-sm">
-        <form onSubmit={handleSubmit} className="flex items-center gap-2 max-w-4xl mx-auto">
-          <Button 
-            type="button" 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isLoading || isRecording}
-            aria-label="Upload an image"
-          >
-            <ImagePlus className="w-5 h-5"/>
-          </Button>
-          <Input
+      <CardFooter className="p-4 border-t">
+        <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full">
+           <Input
             ref={fileInputRef}
             type="file"
             accept="image/*"
@@ -281,33 +261,39 @@ export default function Chat() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question, upload an image or use voice..."
-            className="flex-1"
+            placeholder="Type your message..."
+            className="flex-1 h-12 text-base bg-secondary border-transparent focus:border-primary focus:ring-primary rounded-full"
             disabled={isLoading || isRecording}
             autoComplete="off"
             aria-label="Chat input"
           />
+           <Button 
+            type="button" 
+            variant="ghost" 
+            size="icon" 
+            className="h-12 w-12 shrink-0 rounded-full"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading || isRecording}
+            aria-label="Upload an image"
+          >
+            <ImagePlus className="w-5 h-5"/>
+          </Button>
           <Button 
             type="button" 
             variant="ghost" 
             size="icon" 
             onClick={handleVoiceRecording}
             disabled={isLoading}
-            className={cn(isRecording && "text-red-500")}
+            className={cn("h-12 w-12 shrink-0 rounded-full", isRecording && "text-red-500 bg-red-500/10")}
             aria-label={isRecording ? "Stop recording" : "Start recording"}
           >
             {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
           </Button>
-          <Button type="submit" size="icon" disabled={isLoading || !input.trim() || isRecording} aria-label="Send message">
-            <SendHorizonal className="w-5 h-5" />
+          <Button type="submit" size="icon" className="h-12 w-12 shrink-0 rounded-full" disabled={isLoading || !input.trim() || isRecording} aria-label="Send message">
+            <Send className="w-5 h-5" />
           </Button>
         </form>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          Press <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            <CornerDownLeft className="h-3 w-3" />
-          </kbd> to send.
-        </p>
-      </footer>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
