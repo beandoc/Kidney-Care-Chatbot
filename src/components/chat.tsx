@@ -12,16 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 import { KidneyIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
+import { HistoryMessage } from "@/lib/types";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
   image?: string;
-};
-
-type HistoryMessage = {
-  role: "user" | "model";
-  content: string;
 };
 
 export default function Chat() {
