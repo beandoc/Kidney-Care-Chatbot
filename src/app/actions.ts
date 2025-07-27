@@ -2,7 +2,7 @@
 
 import { Message, Role } from 'genkit';
 import { z } from "genkit";
-import { ai, textModel } from "@/ai/genkit";
+import { ai } from "@/ai/genkit";
 import { getKnowledgeBaseContent } from '@/services/knowledge-base';
 import wav from 'wav';
 
@@ -99,32 +99,16 @@ ${context}
 QUESTION:
 ${input.question}`;
 
-  let model = textModel[0];
-  try {
-    const {output} = await ai.generate({
-      model: model,
-      history,
-      prompt: prompt,
-      system: systemPrompt,
-      output: {
-        schema: ExtractAnswerOutputSchema,
-      },
-    });
-    return output!;
-  } catch (e) {
-    console.error(`Error with model ${model}, trying fallback`, e);
-    model = textModel[1];
-     const {output} = await ai.generate({
-        model: model,
-        history,
-        prompt: prompt,
-        system: systemPrompt,
-        output: {
-          schema: ExtractAnswerOutputSchema,
-        },
-      });
-      return output!;
-  }
+  const {output} = await ai.generate({
+    model: 'googleai/gemini-1.5-flash',
+    history,
+    prompt: prompt,
+    system: systemPrompt,
+    output: {
+      schema: ExtractAnswerOutputSchema,
+    },
+  });
+  return output!;
 }
 
 // Server action for analyzing a food image
@@ -143,26 +127,13 @@ Provide an estimate for its name, calories and protein content.
 
 Image: {{media url=photoDataUri}}`
   
-  let model = textModel[0];
-  try {
-    const {output} = await ai.generate({
-      model: model,
-      prompt: promptTemplate,
-      input: input,
-      output: { schema: AnalyzeFoodImageOutputSchema }
-    });
-    return output!;
-  } catch (e) {
-    console.error(`Error with model ${model}, trying fallback`, e);
-    model = textModel[1];
-    const {output} = await ai.generate({
-      model: model,
-      prompt: promptTemplate,
-      input: input,
-      output: { schema: AnalyzeFoodImageOutputSchema }
-    });
-    return output!;
-  }
+  const {output} = await ai.generate({
+    model: 'googleai/gemini-1.5-flash',
+    prompt: promptTemplate,
+    input: input,
+    output: { schema: AnalyzeFoodImageOutputSchema }
+  });
+  return output!;
 }
 
 // Server action for transcribing audio
@@ -175,26 +146,13 @@ export async function getTranscript(audioDataUri: string): Promise<TranscribeAud
 
 Audio: {{media url=audioDataUri}}`;
 
-  let model = textModel[0];
-  try {
-    const {output} = await ai.generate({
-      model: model,
-      prompt: promptTemplate,
-      input: { audioDataUri },
-      output: { schema: TranscribeAudioOutputSchema }
-    });
-    return output!;
-  } catch (e) {
-    console.error(`Error with model ${model}, trying fallback`, e);
-    model = textModel[1];
-    const {output} = await ai.generate({
-      model: model,
-      prompt: promptTemplate,
-      input: { audioDataUri },
-      output: { schema: TranscribeAudioOutputSchema }
-    });
-    return output!;
-  }
+  const {output} = await ai.generate({
+    model: 'googleai/gemini-1.5-flash',
+    prompt: promptTemplate,
+    input: { audioDataUri },
+    output: { schema: TranscribeAudioOutputSchema }
+  });
+  return output!;
 }
 
 async function toWav(
