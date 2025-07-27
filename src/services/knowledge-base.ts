@@ -17,10 +17,10 @@ async function getVectorStore() {
   try {
     await fs.mkdir(KNOWLEDGE_BASE_DIR, { recursive: true });
     const files = await fs.readdir(KNOWLEDGE_BASE_DIR);
-    const txtFiles = files.filter(file => file.endsWith('.txt'));
+    const supportedFiles = files.filter(file => file.endsWith('.txt') || file.endsWith('.md'));
 
-    if (txtFiles.length === 0) {
-      console.log("No .txt files found in the knowledge base directory. The chatbot will only use its general knowledge.");
+    if (supportedFiles.length === 0) {
+      console.log("No .txt or .md files found in the knowledge base directory. The chatbot will only use its general knowledge.");
       const embeddings = new GoogleGenerativeAIEmbeddings({
         apiKey: process.env.GEMINI_API_KEY,
         model: "text-embedding-004",
@@ -32,7 +32,7 @@ async function getVectorStore() {
     }
 
     const docs: Document[] = [];
-    for (const file of txtFiles) {
+    for (const file of supportedFiles) {
       const filePath = path.join(KNOWLEDGE_BASE_DIR, file);
       const content = await fs.readFile(filePath, 'utf-8');
       docs.push(new Document({ pageContent: content, metadata: { source: file } }));
@@ -46,12 +46,12 @@ async function getVectorStore() {
     const splitDocs = await splitter.splitDocuments(docs);
 
     const embeddings = new GoogleGenerativeAIEmbeddings({
-      apiKey: process.env.GEMINI_API_KEY,
+      apiKey: process.env.GEMINI_KEY,
       model: "text-embedding-004",
     });
 
     vectorStore = await MemoryVectorStore.fromDocuments(splitDocs, embeddings);
-    console.log("Knowledge base loaded successfully.");
+    console.log("Knowledge base loaded successfully from .txt and .md files.");
     return vectorStore;
   } catch (error) {
     console.error("Error initializing knowledge base:", error);
