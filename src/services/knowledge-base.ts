@@ -46,7 +46,7 @@ async function getVectorStore() {
     const splitDocs = await splitter.splitDocuments(docs);
 
     const embeddings = new GoogleGenerativeAIEmbeddings({
-      apiKey: process.env.GEMINI_KEY,
+      apiKey: process.env.GEMINI_API_KEY,
       model: "text-embedding-004",
     });
 
