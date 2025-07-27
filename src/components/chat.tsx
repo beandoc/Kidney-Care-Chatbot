@@ -62,7 +62,7 @@ const InitialMessage = () => {
                         (मराठी, English, हिंदी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, বাংলা or any other language)
                     </p>
                     <p>
-                        <a href="https://nirogyam.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-primary font-bold no-underline hover:underline">Book Appointment at Kidney Wellness Clinic...</a>
+                        <a href="https://nirogyam.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-primary font-bold no-underline hover:underline">ACCESS OUR WEBSITE</a>
                     </p>
                     <p>
                         For regular health updates Follow our WhatsApp channel <a href="https://whatsapp.com/channel/0029Vb5gVK6A2pLFXRiHT23R" target="_blank" rel="noopener noreferrer" className="text-primary font-bold no-underline hover:underline">Nirogyam</a>
