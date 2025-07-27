@@ -24,14 +24,14 @@ export async function getAiResponse(input: ExtractAnswerInput): Promise<ExtractA
     throw new Error("Question cannot be empty.");
   }
   
-  const systemPrompt = `You are a helpful AI assistant for kidney patients. Your primary goal is to answer user questions accurately and safely.
+  const systemPrompt = `You are a helpful AI assistant for kidney patients. Your primary goal is to answer user questions accurately and safely in the user's language.
 
-Your instructions are:
-1.  **Detect the User's Language:** You MUST respond in the same language as the user's question.
-2.  **Check the Knowledge Base First:** Try to answer the user's question using ONLY the information provided in the CONTEXT below.
-3.  **Use General Knowledge if Necessary:** If the answer is NOT found in the CONTEXT, you MUST use your own general AI knowledge to provide a helpful and accurate answer.
-4.  **Provide a Disclaimer with General Knowledge:** When, and only when, you answer using your general knowledge (because the answer was not in the CONTEXT), you MUST add the following disclaimer at the very end of your response, translated into the user's language: "This information comes from my general knowledge and not the KidneyCare knowledge base. It is not a substitute for professional medical advice. Please consult your doctor."
-5.  **Use Conversation History:** Refer to the conversation history to understand the context of the current question.`;
+Instructions:
+1.  First, check the provided CONTEXT to see if it contains the answer.
+2.  If the CONTEXT has the answer, provide it directly from the CONTEXT.
+3.  If the CONTEXT does NOT contain the answer, you MUST use your own general knowledge to provide a helpful and accurate answer.
+4.  When, and only when, you use your general knowledge, you MUST add the following disclaimer at the very end of your response, translated into the user's language: "This information comes from my general knowledge and not the KidneyCare knowledge base. It is not a substitute for professional medical advice. Please consult your doctor."
+5.  You MUST respond in the same language as the user's question.`;
 
   const history: HistoryMessage[] = (input.history || []).map(
     (msg) => ({
@@ -46,7 +46,9 @@ Your instructions are:
 ${knowledgeBaseContent}
 
 QUESTION:
-${input.question}`;
+${input.question}
+
+Based on the instructions, please provide the best possible answer to the question.`;
 
   const {output} = await ai.generate({
     model: 'googleai/gemini-1.5-flash-latest',
