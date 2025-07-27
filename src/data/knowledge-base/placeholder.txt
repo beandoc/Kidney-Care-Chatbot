@@ -1,0 +1,5 @@
+This is a placeholder file for the knowledge base.
+You can add your own .txt files in this directory ('src/data/knowledge-base').
+The chatbot will read these files to answer user questions.
+For example, you can add files with information about kidney health, diet, treatments, etc.
+Remove this file once you have added your own data.

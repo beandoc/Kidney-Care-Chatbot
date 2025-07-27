@@ -8,8 +8,9 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {Message, Role, generationAndUsage} from 'genkit';
+import {Message, Role} from 'genkit';
 import {z} from 'genkit';
+import { getRelevantDocuments } from '@/services/knowledge-base';
 
 const HistoryMessageSchema = z.object({
   role: z.enum(['user', 'model']),
@@ -37,8 +38,8 @@ const systemPrompt = `You are an AI assistant providing information to kidney pa
 
 Detect the language of the user's question (English, Hindi, or Marathi) and respond in the same language.
 
-Provide a precise answer to the user's question, using only information from the database. Do not make up answers or provide information from other sources.
-If the database does not contain the answer to the question, respond that you cannot answer the question because the information is not available in the database.
+Provide a precise answer to the user's question, using only information from the provided context. Do not make up answers or provide information from other sources.
+If the provided context does not contain the answer to the question, respond that you cannot answer the question because the information is not available in the database.
 
 Use the conversation history to understand the context of the user's question.`;
 
@@ -53,11 +54,20 @@ const extractAnswerFlow = ai.defineFlow(
     const history = (input.history || []).map(
       (msg) => new Message(msg.role as Role, msg.content)
     );
+    
+    const relevantDocs = await getRelevantDocuments(input.question);
+    const context = relevantDocs.map(doc => doc.pageContent).join('\n\n');
+
+    const prompt = `CONTEXT:
+${context}
+
+QUESTION:
+${input.question}`;
 
     const {output} = await ai.generate({
       model: 'googleai/gemini-2.0-flash',
       history,
-      prompt: input.question,
+      prompt: prompt,
       system: systemPrompt,
       output: {
         schema: ExtractAnswerOutputSchema,
