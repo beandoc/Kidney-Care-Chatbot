@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect, type FormEvent } from "react";
-import { Send, Bot, User, ImagePlus, Mic, MicOff, Star, XCircle } from "lucide-react";
+import { Send, Bot, User, ImagePlus, Mic, MicOff, Star, XCircle, Volume2, Loader } from "lucide-react";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getAiResponse, getFoodAnalysis, getTranscript } from "@/app/actions";
+import { getAiResponse, getFoodAnalysis, getTranscript, getAudioResponse } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { KidneyIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,9 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [audioPlaying, setAudioPlaying] = useState<HTMLAudioElement | null>(null);
+  const [audioLoading, setAudioLoading] = useState<number | null>(null);
+
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -183,6 +186,39 @@ export default function Chat() {
     }
   };
 
+  const handlePlayAudio = async (text: string, index: number) => {
+    if (audioPlaying) {
+      audioPlaying.pause();
+      if (audioPlaying.src) {
+        URL.revokeObjectURL(audioPlaying.src);
+      }
+      setAudioPlaying(null);
+      if (audioLoading === index) {
+        setAudioLoading(null);
+        return;
+      }
+    }
+    
+    setAudioLoading(index);
+
+    try {
+      const { audioDataUri } = await getAudioResponse(text);
+      const audio = new Audio(audioDataUri);
+      audio.onended = () => {
+        setAudioPlaying(null);
+        setAudioLoading(null);
+      };
+      audio.play();
+      setAudioPlaying(audio);
+    } catch (e) {
+      toast({
+        variant: "destructive",
+        title: "Text-to-Speech Error",
+        description: "Could not convert text to speech, please try again",
+      });
+      setAudioLoading(null);
+    }
+  }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -243,7 +279,7 @@ export default function Chat() {
                 )}
                 <div
                   className={cn(
-                    "max-w-xl rounded-2xl p-4",
+                    "max-w-xl rounded-2xl p-4 group relative",
                     message.role === "user"
                       ? "bg-primary text-primary-foreground rounded-br-none"
                       : "bg-secondary text-secondary-foreground rounded-bl-none"
@@ -255,6 +291,18 @@ export default function Chat() {
                      </div>
                   )}
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                   {message.role === 'assistant' && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="absolute -top-2 -right-2 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handlePlayAudio(message.content, index)}
+                      disabled={!!audioLoading}
+                      aria-label="Play audio"
+                    >
+                      {audioLoading === index ? <Loader className="w-4 h-4 animate-spin"/> : <Volume2 className="w-4 h-4" />}
+                    </Button>
+                  )}
                 </div>
                  {message.role === "user" && (
                   <Avatar className="w-9 h-9 border">
@@ -306,7 +354,7 @@ export default function Chat() {
                   className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/50 hover:bg-black/75 text-white"
                   onClick={() => {
                     setImagePreview(null)
-                    if(fileInputRef.current) fileInputRef.current.value = "";
+                    if(fileInputrRef.current) fileInputRef.current.value = "";
                   }}
                 >
                   <XCircle className="w-4 h-4" />
