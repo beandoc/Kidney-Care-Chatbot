@@ -20,6 +20,79 @@ type Message = {
   image?: string;
 };
 
+const Typewriter = ({ text, onFinished }: { text: string, onFinished?: () => void }) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const index = useRef(0);
+
+  useEffect(() => {
+    if (!text) return;
+    const intervalId = setInterval(() => {
+      if (index.current < text.length) {
+        setDisplayedText((prev) => prev + text.charAt(index.current));
+        index.current++;
+      } else {
+        clearInterval(intervalId);
+        if (onFinished) {
+          onFinished();
+        }
+      }
+    }, 25);
+    return () => clearInterval(intervalId);
+  }, [text, onFinished]);
+
+  return <p>{displayedText}</p>;
+};
+
+const InitialMessage = () => {
+    const [step, setStep] = useState(0);
+
+    const messages = [
+        "Hello! I'm here to assist you with all your questions about Kidney Health, the Kidney Wellness Clinic or Dr Sachin Srivastava.",
+        "Whether you need to schedule an in-clinic appointment (preferred) or an online consult, learn more about our services, or get more information. I'm here to help you every step of the way. Let's ensure you have a wonderful experience!",
+    ];
+
+    return (
+        <div className="prose prose-sm max-w-full text-left bg-secondary p-4 rounded-lg space-y-4">
+            {messages.slice(0, step + 1).map((msg, i) => (
+                <Typewriter key={i} text={msg} onFinished={() => (i === step && step < messages.length - 1) ? setStep(s => s + 1) : null} />
+            ))}
+            {step >= messages.length - 1 && (
+                <>
+                    <p className="text-xs italic">
+                        (मराठी, English, हिंदी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, বাংলা or any other language)
+                    </p>
+                    <p>
+                        <a href="https://nirogyam.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-primary font-bold no-underline hover:underline">Book Appointment at Kidney Wellness Clinic...</a>
+                    </p>
+                    <p>
+                        For regular health updates Follow our WhatsApp channel <a href="https://whatsapp.com/channel/0029Vb5gVK6A2pLFXRiHT23R" target="_blank" rel="noopener noreferrer" className="text-primary font-bold no-underline hover:underline">Nirogyam</a>
+                    </p>
+                    <p>
+                        For everything else regarding Kidney Disease like -
+                    </p>
+                    <ul className="list-disc list-inside">
+                        <li>Prevention and Precautions</li>
+                        <li>Lifestyle or diet</li>
+                        <li>Vaccination</li>
+                        <li>Dialysis or Kidney Transplant</li>
+                        <li>and much more . . . you can ask me below. . .</li>
+                    </ul>
+                    <p className="text-xs italic">
+                        (मराठी, English, हिंदी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, বাংলা or any other language)
+                    </p>
+                    <p className="text-xs font-bold border-t border-muted pt-2 mt-4">
+                        This is an automated chatbot response. The responses are for information purpose only, and should not be construed as medical advise!
+                    </p>
+                    <p className="text-xs font-bold">
+                        In case of an emergency or urgent care please connect with the nearest hospital.
+                    </p>
+                </>
+            )}
+        </div>
+    );
+};
+
+
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -252,39 +325,7 @@ export default function Chat() {
                 <div className="p-4 rounded-full bg-primary/10 mb-2">
                   <Bot className="w-12 h-12 text-primary" />
                 </div>
-                <div className="prose prose-sm max-w-full text-left bg-secondary p-4 rounded-lg">
-                  <p>
-                    Hello! I'm here to assist you with all your questions about Kidney Health, the Kidney Wellness Clinic or Dr Sachin Srivastava.. Whether you need to schedule an in-clinic appointment (preferred) or an online consult, learn more about our services, or get more information. I'm here to help you every step of the way. Let's ensure you have a wonderful experience!
-                  </p>
-                  <p className="text-xs italic">
-                    (मराठी, English, हिंदी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, বাংলা or any other language)
-                  </p>
-                  <p>
-                    <a href="#" className="text-primary font-bold no-underline hover:underline">Book Appointment at Kidney Wellness Clinic...</a>
-                  </p>
-                  <p>
-                    For regular health updates Follow our WhatsApp channel <a href="#" className="text-primary font-bold no-underline hover:underline">Nirogyam</a>
-                  </p>
-                  <p>
-                    For everything else regarding Kidney Disease like -
-                  </p>
-                  <ul className="list-disc list-inside">
-                    <li>Prevention and Precautions</li>
-                    <li>Lifestyle or diet</li>
-                    <li>Vaccination</li>
-                    <li>Dialysis or Kidney Transplant</li>
-                    <li>and much more . . . you can ask me below. . .</li>
-                  </ul>
-                   <p className="text-xs italic">
-                    (मराठी, English, हिंदी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, বাংলা or any other language)
-                  </p>
-                  <p className="text-xs font-bold border-t border-muted pt-2 mt-4">
-                    This is an automated chatbot response. The responses are for information purpose only, and should not be construed as medical advise!
-                  </p>
-                  <p className="text-xs font-bold">
-                    In case of an emergency or urgent care please connect with the nearest hospital.
-                  </p>
-                </div>
+                <InitialMessage />
               </div>
             )}
             {messages.map((message, index) => (
@@ -433,3 +474,5 @@ export default function Chat() {
     </Card>
   );
 }
+
+    
