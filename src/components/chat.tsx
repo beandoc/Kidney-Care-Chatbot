@@ -1,20 +1,23 @@
 "use client";
 
 import { useState, useRef, useEffect, type FormEvent } from "react";
-import { SendHorizonal, Bot, User, CornerDownLeft } from "lucide-react";
+import { SendHorizonal, Bot, User, CornerDownLeft, ImagePlus } from "lucide-react";
+import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getAiResponse } from "@/app/actions";
+import { getAiResponse, getFoodAnalysis } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { KidneyIcon } from "@/components/icons";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
+  image?: string;
 };
 
 export default function Chat() {
@@ -22,6 +25,7 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -29,6 +33,48 @@ export default function Chat() {
       scrollAreaViewportRef.current.scrollTop = scrollAreaViewportRef.current.scrollHeight;
     }
   }, [messages]);
+  
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const dataUri = reader.result as string;
+        
+        const userMessage: Message = { role: "user", content: `Analyze this image:`, image: dataUri };
+        setMessages((prev) => [...prev, userMessage]);
+        setIsLoading(true);
+
+        try {
+          const result = await getFoodAnalysis(dataUri);
+          const assistantMessage: Message = {
+            role: 'assistant',
+            content: `I have analyzed the image. It appears to be **${result.foodName}**. Here is the nutritional information: \n\n- **Calories:** ${result.calories} kcal\n- **Protein:** ${result.protein}g`,
+          };
+          setMessages(prev => [...prev, assistantMessage]);
+        } catch (error) {
+           console.error("Error getting food analysis:", error);
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Failed to analyze the image. Please try again.",
+            });
+             const errorMessage: Message = {
+              role: "assistant",
+              content: "I'm sorry, I was unable to analyze that image.",
+            };
+            setMessages((prev) => [...prev, errorMessage]);
+        } finally {
+          setIsLoading(false);
+          // Reset file input
+          if(fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,7 +126,7 @@ export default function Chat() {
                 <Bot className="w-16 h-16 mb-4 text-primary/80" />
                 <h2 className="text-2xl font-semibold">Welcome!</h2>
                 <p className="max-w-md mt-2">
-                  Ask me anything about kidney health in English, Hindi, or Marathi.
+                  Ask me anything about kidney health or upload an image of food to get its nutritional information.
                 </p>
               </div>
             )}
@@ -107,6 +153,11 @@ export default function Chat() {
                       : "bg-card rounded-bl-none"
                   )}
                 >
+                  {message.image && (
+                     <div className="mb-2">
+                        <Image src={message.image} alt="User upload" width={300} height={300} className="rounded-md"/>
+                     </div>
+                  )}
                   <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 </div>
                 {message.role === "user" && (
@@ -140,10 +191,28 @@ export default function Chat() {
 
       <footer className="p-4 border-t bg-background/80 backdrop-blur-sm">
         <form onSubmit={handleSubmit} className="flex items-center gap-2 max-w-4xl mx-auto">
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading}
+            aria-label="Upload an image"
+          >
+            <ImagePlus className="w-5 h-5"/>
+          </Button>
+          <Input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+            disabled={isLoading}
+          />
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question in English, Hindi, or Marathi..."
+            placeholder="Ask a question or upload an image..."
             className="flex-1"
             disabled={isLoading}
             autoComplete="off"
